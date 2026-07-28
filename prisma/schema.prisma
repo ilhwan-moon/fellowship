@@ -1,0 +1,158 @@
+// 교회 기능 플랫폼 — Prisma 스키마
+// 설계 근거: docs/ARCHITECTURE.md §5
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- 인증 / 권한 ----------
+
+enum Role {
+  ADMIN
+  LEADER
+  MEMBER
+}
+
+model User {
+  id           String        @id @default(cuid())
+  loginId      String        @unique
+  name         String
+  passwordHash String
+  role         Role          @default(LEADER)
+  createdAt    DateTime      @default(now())
+  runs         ActivityRun[]
+}
+
+// ---------- 공용 도메인 ----------
+
+enum Gender {
+  BROTHER
+  SISTER
+}
+
+model Group {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0)
+  members   Member[]
+}
+
+model Member {
+  id             String           @id @default(cuid())
+  name           String
+  gender         Gender?
+  photoUrl       String?
+  phone          String?
+  birthday       DateTime?
+  memo           String?
+  isActive       Boolean          @default(true)
+  groupId        String?
+  group          Group?           @relation(fields: [groupId], references: [id])
+  createdAt      DateTime         @default(now())
+  participations RunParticipant[]
+
+  @@index([isActive, name])
+}
+
+// ---------- 기능 공통 실행 이력 ----------
+
+model Feature {
+  slug      String  @id
+  isEnabled Boolean @default(true)
+  sortOrder Int     @default(0)
+  config    Json
+}
+
+model ActivityRun {
+  id          String    @id @default(cuid())
+  featureSlug String
+  title       String?
+  roomCode    String?   @unique
+  status      String    @default("READY")
+  config      Json
+  result      Json
+  createdById String?
+  createdBy   User?     @relation(fields: [createdById], references: [id])
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+
+  participants RunParticipant[]
+  teams        Team[]
+  answers      QuizAnswer[]
+
+  @@index([featureSlug, startedAt])
+}
+
+model Team {
+  id      String           @id @default(cuid())
+  runId   String
+  run     ActivityRun      @relation(fields: [runId], references: [id], onDelete: Cascade)
+  name    String
+  color   String?
+  score   Int              @default(0)
+  members RunParticipant[]
+}
+
+model RunParticipant {
+  id          String      @id @default(cuid())
+  runId       String
+  run         ActivityRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  memberId    String?
+  member      Member?     @relation(fields: [memberId], references: [id])
+  guestName   String?
+  orderNo     Int?
+  resultLabel String?
+  teamId      String?
+  team        Team?       @relation(fields: [teamId], references: [id])
+  score       Int         @default(0)
+
+  @@unique([runId, memberId])
+}
+
+// ---------- 성경퀴즈 ----------
+
+enum QuizType {
+  OX
+  MULTIPLE
+  SHORT
+}
+
+model QuizCategory {
+  id        String         @id @default(cuid())
+  name      String         @unique
+  questions QuizQuestion[]
+}
+
+model QuizQuestion {
+  id          String        @id @default(cuid())
+  categoryId  String?
+  category    QuizCategory? @relation(fields: [categoryId], references: [id])
+  type        QuizType
+  question    String
+  choices     Json
+  answer      String
+  explanation String?
+  reference   String?
+  difficulty  Int           @default(1)
+  imageUrl    String?
+  isActive    Boolean       @default(true)
+  answers     QuizAnswer[]
+}
+
+model QuizAnswer {
+  id            String       @id @default(cuid())
+  runId         String
+  run           ActivityRun  @relation(fields: [runId], references: [id], onDelete: Cascade)
+  questionId    String
+  question      QuizQuestion @relation(fields: [questionId], references: [id])
+  participantId String?
+  given         String?
+  isCorrect     Boolean
+  elapsedMs     Int?
+  answeredAt    DateTime     @default(now())
+}

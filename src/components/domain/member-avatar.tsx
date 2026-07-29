@@ -5,10 +5,12 @@ export function MemberAvatar({
   name,
   photoUrl,
   className,
+  style,
 }: {
   name: string;
   photoUrl?: string | null;
   className?: string;
+  style?: React.CSSProperties;
 }) {
   if (photoUrl) {
     return (
@@ -16,6 +18,7 @@ export function MemberAvatar({
       <img
         src={photoUrl}
         alt={name}
+        style={style}
         className={cn(
           "size-9 shrink-0 rounded-full object-cover ring-1 ring-foreground/10",
           className,
@@ -26,6 +29,7 @@ export function MemberAvatar({
 
   return (
     <div
+      style={style}
       className={cn(
         "flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br font-semibold text-white",
         gradientForName(name),

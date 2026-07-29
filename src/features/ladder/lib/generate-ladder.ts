@@ -1,3 +1,5 @@
+export { shuffled } from "@/lib/shuffle";
+
 export type LadderRung = { row: number; leftIndex: number };
 
 /** 참가자 수에 맞는 사다리 가로줄(행) 개수를 정한다. */
@@ -36,13 +38,4 @@ export function computeResultOrder(count: number, rungs: LadderRung[], rows: num
     result[start] = pos;
   }
   return result;
-}
-
-export function shuffled<T>(items: T[]): T[] {
-  const arr = [...items];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  return arr;
 }

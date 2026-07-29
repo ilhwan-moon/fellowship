@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Maximize, Minimize, Shuffle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,7 @@ import {
 } from "@/features/ladder/lib/generate-ladder";
 import type { LadderResultEntry, Participant } from "@/features/ladder/types";
 import { cn } from "@/lib/utils";
+import { useFullscreen } from "@/lib/use-fullscreen";
 
 type Step = "SETUP" | "ANIMATING" | "RESULT";
 
@@ -37,29 +38,7 @@ export function LadderGame({ initialMembers }: { initialMembers: Participant[] }
   const [saved, setSaved] = useState(false);
   const [, startSaving] = useTransition();
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-
-  useEffect(() => {
-    function onChange() {
-      setIsFullscreen(document.fullscreenElement === containerRef.current);
-    }
-    document.addEventListener("fullscreenchange", onChange);
-    return () => document.removeEventListener("fullscreenchange", onChange);
-  }, []);
-
-  async function toggleFullscreen() {
-    if (!containerRef.current) return;
-    try {
-      if (document.fullscreenElement) {
-        await document.exitFullscreen();
-      } else {
-        await containerRef.current.requestFullscreen();
-      }
-    } catch {
-      // 브라우저가 전체화면 요청을 거부한 경우 (권한 정책 등) - 조용히 무시
-    }
-  }
+  const { ref: containerRef, isFullscreen, toggle: toggleFullscreen } = useFullscreen<HTMLDivElement>();
 
   const selectedMembers = useMemo(
     () => initialMembers.filter((m) => selectedKeys.has(m.key)),
@@ -238,7 +217,7 @@ export function LadderGame({ initialMembers }: { initialMembers: Participant[] }
 
       {step === "RESULT" && (
         <div className="space-y-4">
-          <ResultView entries={resultEntries} />
+          <ResultView entries={resultEntries} isFullscreen={isFullscreen} />
           <p className="text-center text-xs text-muted-foreground">
             {saved ? "진행 이력에 저장되었습니다." : "저장 중..."}
           </p>

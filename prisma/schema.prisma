@@ -120,6 +120,8 @@ enum QuizType {
   OX
   MULTIPLE
   SHORT
+  /// 성경 구절 단어 배열 맞추기 (reference=구절 참조, answer=구절 본문)
+  WORD_ORDER
 }
 
 model QuizCategory {

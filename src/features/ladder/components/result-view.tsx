@@ -7,7 +7,13 @@ import { MemberAvatar } from "@/components/domain/member-avatar";
 import type { LadderResultEntry } from "@/features/ladder/types";
 import { cn } from "@/lib/utils";
 
-export function ResultView({ entries }: { entries: LadderResultEntry[] }) {
+export function ResultView({
+  entries,
+  isFullscreen = false,
+}: {
+  entries: LadderResultEntry[];
+  isFullscreen?: boolean;
+}) {
   const [mode, setMode] = useState<"list" | "presenter">("list");
   const [current, setCurrent] = useState(0);
 
@@ -53,7 +59,12 @@ export function ResultView({ entries }: { entries: LadderResultEntry[] }) {
           ))}
         </div>
       ) : (
-        <PresenterCard entries={entries} current={current} onChange={setCurrent} />
+        <PresenterCard
+          entries={entries}
+          current={current}
+          onChange={setCurrent}
+          isFullscreen={isFullscreen}
+        />
       )}
     </div>
   );
@@ -63,48 +74,105 @@ function PresenterCard({
   entries,
   current,
   onChange,
+  isFullscreen,
 }: {
   entries: LadderResultEntry[];
   current: number;
   onChange: (i: number) => void;
+  isFullscreen: boolean;
 }) {
   const entry = entries[current];
+  const next = entries[current + 1];
 
   return (
-    <div className="flex flex-col items-center gap-6 rounded-2xl border bg-card px-6 py-10 sm:py-16">
-      <span className="text-sm font-medium text-muted-foreground">
+    <div
+      className={cn(
+        "flex flex-col items-center gap-6 rounded-2xl border bg-card px-6 py-10 sm:py-16",
+        isFullscreen && "min-h-[85vh] justify-center gap-10 border-none py-0",
+      )}
+    >
+      <span
+        className={cn(
+          "font-medium text-muted-foreground",
+          isFullscreen ? "text-2xl sm:text-3xl" : "text-sm",
+        )}
+      >
         {current + 1} / {entries.length}번째 순서
       </span>
 
       <MemberAvatar
         name={entry.name}
         photoUrl={entry.photoUrl}
-        className="size-32 text-4xl sm:size-44 sm:text-6xl"
+        className={cn("size-32 text-4xl sm:size-44 sm:text-6xl")}
+        style={
+          isFullscreen
+            ? {
+                width: "clamp(220px, 34vmin, 460px)",
+                height: "clamp(220px, 34vmin, 460px)",
+                fontSize: "clamp(4rem, 12vmin, 9rem)",
+              }
+            : undefined
+        }
       />
 
       <div className="text-center">
-        <p className="text-3xl font-bold sm:text-5xl">{entry.name}</p>
+        <p
+          className={cn("font-bold", isFullscreen ? "" : "text-3xl sm:text-5xl")}
+          style={isFullscreen ? { fontSize: "clamp(3rem, 9vmin, 7rem)" } : undefined}
+        >
+          {entry.name}
+        </p>
         {entry.groupName && (
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">{entry.groupName}</p>
+          <p
+            className={cn(
+              "mt-1 text-muted-foreground",
+              isFullscreen ? "text-2xl sm:text-3xl" : "text-sm sm:text-base",
+            )}
+          >
+            {entry.groupName}
+          </p>
         )}
       </div>
+
+      {next && (
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-full bg-muted/60 pr-4 pl-1.5",
+            isFullscreen ? "py-3 text-xl sm:text-2xl" : "py-1.5 text-sm",
+          )}
+        >
+          <MemberAvatar
+            name={next.name}
+            photoUrl={next.photoUrl}
+            className={isFullscreen ? "" : "size-7"}
+            style={
+              isFullscreen
+                ? { width: "clamp(40px, 5vmin, 64px)", height: "clamp(40px, 5vmin, 64px)" }
+                : undefined
+            }
+          />
+          <span className="text-muted-foreground">다음 순서</span>
+          <span className="font-semibold">{next.name}</span>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <Button
           type="button"
           variant="outline"
-          size="icon"
+          size={isFullscreen ? "icon-lg" : "icon"}
           disabled={current === 0}
           onClick={() => onChange(current - 1)}
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className={isFullscreen ? "size-6" : "size-4"} />
         </Button>
         <div className="flex gap-1.5">
           {entries.map((_, i) => (
             <span
               key={i}
               className={cn(
-                "size-1.5 rounded-full bg-muted-foreground/30",
+                "rounded-full bg-muted-foreground/30",
+                isFullscreen ? "size-2.5" : "size-1.5",
                 i === current && "bg-primary",
               )}
             />
@@ -113,11 +181,11 @@ function PresenterCard({
         <Button
           type="button"
           variant="outline"
-          size="icon"
+          size={isFullscreen ? "icon-lg" : "icon"}
           disabled={current === entries.length - 1}
           onClick={() => onChange(current + 1)}
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight className={isFullscreen ? "size-6" : "size-4"} />
         </Button>
       </div>
     </div>

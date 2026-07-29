@@ -120,12 +120,17 @@ export function LadderGame({ initialMembers }: { initialMembers: Participant[] }
       )}
     >
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">
+        <h2 className={cn("font-semibold", isFullscreen ? "text-2xl sm:text-3xl" : "text-lg")}>
           {step === "SETUP" && "참가자 설정"}
           {step === "ANIMATING" && "사다리 타는 중..."}
           {step === "RESULT" && "간증 순서 결과"}
         </h2>
-        <Button type="button" variant="outline" size="icon-sm" onClick={toggleFullscreen}>
+        <Button
+          type="button"
+          variant="outline"
+          size={isFullscreen ? "icon" : "icon-sm"}
+          onClick={toggleFullscreen}
+        >
           {isFullscreen ? <Minimize className="size-4" /> : <Maximize className="size-4" />}
           <span className="sr-only">전체화면 전환</span>
         </Button>
@@ -211,6 +216,7 @@ export function LadderGame({ initialMembers }: { initialMembers: Participant[] }
           participants={gameParticipants}
           rungs={rungs}
           rows={rows}
+          isFullscreen={isFullscreen}
           onComplete={handleAnimationComplete}
         />
       )}

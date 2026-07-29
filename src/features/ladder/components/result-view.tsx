@@ -23,7 +23,7 @@ export function ResultView({
         <Button
           type="button"
           variant={mode === "list" ? "secondary" : "outline"}
-          size="sm"
+          size={isFullscreen ? "default" : "sm"}
           onClick={() => setMode("list")}
         >
           <List className="size-4" />
@@ -32,7 +32,7 @@ export function ResultView({
         <Button
           type="button"
           variant={mode === "presenter" ? "secondary" : "outline"}
-          size="sm"
+          size={isFullscreen ? "default" : "sm"}
           onClick={() => {
             setMode("presenter");
             setCurrent(0);
@@ -46,14 +46,35 @@ export function ResultView({
       {mode === "list" ? (
         <div className="divide-y overflow-hidden rounded-xl border">
           {entries.map((e) => (
-            <div key={e.key} className="flex items-center gap-3 px-4 py-3">
-              <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+            <div
+              key={e.key}
+              className={cn("flex items-center gap-3 px-4 py-3", isFullscreen && "gap-5 px-6 py-5")}
+            >
+              <span
+                className={cn(
+                  "flex shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground",
+                  isFullscreen ? "size-12 text-xl sm:size-14 sm:text-2xl" : "size-7 text-xs",
+                )}
+              >
                 {e.orderNo}
               </span>
-              <MemberAvatar name={e.name} photoUrl={e.photoUrl} className="size-10" />
-              <span className="font-medium">{e.name}</span>
+              <MemberAvatar
+                name={e.name}
+                photoUrl={e.photoUrl}
+                className={isFullscreen ? "size-16 text-2xl sm:size-20 sm:text-3xl" : "size-10"}
+              />
+              <span className={cn("font-medium", isFullscreen && "text-2xl sm:text-3xl")}>
+                {e.name}
+              </span>
               {e.groupName && (
-                <span className="ml-auto text-xs text-muted-foreground">{e.groupName}</span>
+                <span
+                  className={cn(
+                    "ml-auto text-muted-foreground",
+                    isFullscreen ? "text-lg sm:text-xl" : "text-xs",
+                  )}
+                >
+                  {e.groupName}
+                </span>
               )}
             </div>
           ))}

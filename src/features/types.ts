@@ -12,7 +12,7 @@ export type FeatureManifest = {
   description: string;
   icon: LucideIcon;
   category: FeatureCategory;
-  /** 카드 배경 그라디언트 (Tailwind from-*/to-* 클래스) */
+  /** 카드 배경 그라디언트 (Tailwind from-*, to-* 클래스) */
   accent: string;
   minRole: FeatureRole;
   /** 참가자 명단 선택 UI가 필요한 기능인지 */

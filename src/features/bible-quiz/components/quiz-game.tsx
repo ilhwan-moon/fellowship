@@ -61,7 +61,14 @@ export function QuizGame({
   }
 
   function handleAnswered(result: QuizAnswerResult) {
-    setResults((prev) => [...prev, result]);
+    // 같은 문제를 "다시 풀기"로 재도전한 경우, 이전 기록을 최신 결과로 덮어쓴다.
+    setResults((prev) => {
+      const existingIndex = prev.findIndex((r) => r.questionId === result.questionId);
+      if (existingIndex === -1) return [...prev, result];
+      const next = [...prev];
+      next[existingIndex] = result;
+      return next;
+    });
   }
 
   function handleNext() {

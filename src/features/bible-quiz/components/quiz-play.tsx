@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Check, Eye, X } from "lucide-react";
+import { Check, Eye, RotateCcw, SkipForward, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { shuffled } from "@/lib/shuffle";
@@ -119,6 +119,24 @@ export function QuizPlay({
       setFilledWords([]);
       setPeeking(false);
     }, PEEK_MS);
+  }
+
+  function handleSkip() {
+    submit();
+  }
+
+  function handleRetry() {
+    const next = buildScramble(verse.text, HINT_RATIO[difficulty]);
+    setScramble(next);
+    setPool(next.pool);
+    setFilledWords([]);
+    setRemaining(timeLimitSec);
+    setRevealed(false);
+    setWrongPositions([]);
+    setCorrect(false);
+    setPeeking(false);
+    startRef.current = performance.now();
+    submittedRef.current = false;
   }
 
   const allFilled = filledWords.length === scramble.blankPositions.length;
@@ -254,15 +272,27 @@ export function QuizPlay({
           >
             {verse.text}
           </p>
-          <Button type="button" size={isFullscreen ? "lg" : "default"} className="w-full" onClick={onNext}>
-            {index + 1 === total ? "결과 보기" : "다음 문제"}
-          </Button>
+          <div className="flex gap-2">
+            {!correct && (
+              <Button type="button" variant="outline" onClick={handleRetry}>
+                <RotateCcw className="size-4" />
+                다시 풀기
+              </Button>
+            )}
+            <Button type="button" size={isFullscreen ? "lg" : "default"} className="flex-1" onClick={onNext}>
+              {index + 1 === total ? "결과 보기" : "다음 문제"}
+            </Button>
+          </div>
         </div>
       ) : (
         <div className="flex gap-2">
           <Button type="button" variant="outline" onClick={handlePeekReset} disabled={peeking}>
             <Eye className="size-4" />
             정답 잠깐 보기
+          </Button>
+          <Button type="button" variant="outline" onClick={handleSkip} disabled={peeking}>
+            <SkipForward className="size-4" />
+            건너뛰기
           </Button>
           <Button type="button" className="flex-1" disabled={!allFilled || peeking} onClick={submit}>
             정답 확인
